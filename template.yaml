@@ -1,3 +1,157 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
-Resources: {}
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  zonefarrahcampbellcom:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: farrahcampbell.com.
+      HostedZoneConfig:
+        Comment: HostedZone created by Route53 Registrar
+  dnsfarrahcampbellcom:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref zonefarrahcampbellcom
+      RecordSets:
+        - Name: farrahcampbell.com.
+          Type: A
+          AliasTarget:
+            HostedZoneId: Z2FDTNDATAQYW2
+            DNSName: d3lu8fyakla5r7.cloudfront.net
+  dns53be0a630d1210deb797d2a1c158e2dbfarrahcampbellcom:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref zonefarrahcampbellcom
+      RecordSets:
+        - Name: _53be0a630d1210deb797d2a1c158e2db.farrahcampbell.com.
+          Type: CNAME
+          TTL: '300'
+          ResourceRecords:
+            - _c9907d861992cd0e5d24bfc51fc577d9.mzlfeqexyx.acm-validations.aws.
+  dnswwwfarrahcampbellcom:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref zonefarrahcampbellcom
+      RecordSets:
+        - Name: www.farrahcampbell.com.
+          Type: A
+          AliasTarget:
+            HostedZoneId: Z3AQBSTGFYJSTF
+            DNSName: s3-website-us-east-1.amazonaws.com
+  distd3lu8fyakla5r7cloudfrontnet:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - farrahcampbell.com
+        Enabled: true
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_All
+        DefaultCacheBehavior:
+          TargetOriginId: S3-Website-farrahcampbell.com.s3-website-us-east-1.amazonaws.com
+          ViewerProtocolPolicy: redirect-to-https
+          MinTTL: 0
+          AllowedMethods:
+            - HEAD
+            - GET
+          CachedMethods:
+            - HEAD
+            - GET
+          ForwardedValues:
+            Cookies:
+              Forward: none
+        Origins:
+          - DomainName: farrahcampbell.com.s3-website-us-east-1.amazonaws.com
+            Id: S3-Website-farrahcampbell.com.s3-website-us-east-1.amazonaws.com
+            S3OriginConfig:
+              HTTPPort: '80'
+              HTTPSPort: '443'
+              OriginProtocolPolicy: http-only
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+            Locations: []
+        ViewerCertificate:
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.1_2016
+  distd279xqlc4hq94ecloudfrontnet:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Aliases:
+          - www.farrahcampbell.com
+        Enabled: true
+        PriceClass: PriceClass_All
+        DefaultCacheBehavior:
+          TargetOriginId: S3-Website-www.farrahcampbell.com.s3-website-us-east-1.amazonaws.com
+          ViewerProtocolPolicy: redirect-to-https
+          MinTTL: 0
+          AllowedMethods:
+            - HEAD
+            - GET
+          CachedMethods:
+            - HEAD
+            - GET
+          ForwardedValues:
+            Cookies:
+              Forward: none
+        Origins:
+          - DomainName: www.farrahcampbell.com.s3-website-us-east-1.amazonaws.com
+            Id: S3-Website-www.farrahcampbell.com.s3-website-us-east-1.amazonaws.com
+            S3OriginConfig:
+              HTTPPort: '80'
+              HTTPSPort: '443'
+              OriginProtocolPolicy: http-only
+        Restrictions:
+          GeoRestriction:
+            RestrictionType: none
+            Locations: []
+        ViewerCertificate:
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.1_2016
+  s3farrahcampbellcom:
+    Type: AWS::S3::Bucket
+    Properties:
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: 404.html
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Suspended
+  s3wwwfarrahcampbellcom:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      VersioningConfiguration:
+        Status: Suspended
+  s3policyfarrahcampbellcom:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref s3farrahcampbellcom
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - farrahcampbell
+                - .com/*
+  s3policywwwfarrahcampbellcom:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref s3wwwfarrahcampbellcom
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadGetObject
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - www
+                - .farrahcampbell.com/*
+Description: website
